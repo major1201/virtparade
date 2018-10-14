@@ -1,0 +1,39 @@
+---
+debug: true
+
+images:                                 # required; image definitions
+  centos7:                              # required; image name
+    path: /opt/images/centos7.qcow2     # required; image path
+    format: qcow2                       # required; image format, supported formats: raw, qcow, qcow2, vhdx, vmdk
+    root_dev: /dev/sda1                 # required; image expand partition, you can use `virt-filesystems -a image_path --filesystems -l` to select a device
+  ubuntu1604:
+    path: /opt/images/ubuntu1604.qcow2
+    format: qcow2
+    root_dev: /dev/sda1
+  freebsd_iso:
+    path: /opt/images/freebsd.iso
+    format: raw
+    root_dev: /dev/sda
+
+instances:                              # required; instance definitions
+  - name: mycentos7                     # required; instance name
+    vcpu: 4                             # required; vcpu number
+    memory: 4                           # required; memory size(GiB)
+    disks:                              # required; disks definitions, at least on disk should be assigned
+      - path: /data/test1.vmdk          # required; dest disk path
+        format: vmdk                    # required; disk format, supported formats are same to image format
+        image: centos7                  # optional; the disk would be created based on image name defined earlier
+        size: 40                        # required, except when image is specified; unit: GiB
+      - path: /data/test1-disk.qcow2    # optional; disk2
+        format: qcow2
+        size: 40
+    cdrom_image: freebsd_iso            # optional; insert a cdrom to the virtual machine with iso file defined in images
+    network:                            # required; network definitions
+      addresses:                        # required; network address definitions
+        - ip: 10.246.214.218            # required; ip address
+          prefix: 24                    # required; cidr
+          gateway: 10.246.214.1         # optional; network gateway, only on could be specified through all addresses
+          network_bridge: br-mgmt       # required; network bridge on host
+      dns:                              # optional; network dns addresses
+        - 192.168.102.81
+...

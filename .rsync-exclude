@@ -1,0 +1,6 @@
+.rsync-exclude
+.git/
+venv/
+.idea/
+*.pyc
+__pycache__/
