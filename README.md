@@ -1,7 +1,7 @@
 VirtParade
 ===
 
-An easy-use tool help you create kvm virtual machines gracefully with simple configuration on Linux servers.
+An easy-use tool helps you create kvm virtual machines gracefully with simple configurations on Linux servers.
 
 ## Requirements
 
@@ -34,20 +34,20 @@ cp -a ./virtparade-config-sample /etc/virtparade
 
 ## VirtParade running roadmap
 
-1. check `/etc/virtparade/config.yml`
+1. Check `/etc/virtparade/config.yml`
 2. Build your first instance(if it is not exist)
-3. Create disks: if the disk is based on image(have the "image" property), copy and resize the image, expand the filesystem, convert image format. If it is the first disk and is based on image, mount the disk to a temp directory and run init scripts.
-4. Generate libvirt instance XML file from `/etc/virtparade/instance.xml`
+3. Create disks: if the disk is based on image(have the `image` property), copy and resize the image, expand the filesystem, convert image format. If it is the first disk and is based on image, mount the disk to a temp directory and run init scripts.
+4. Generate libvirt instance XML file from the Jinja2 template file: `/etc/virtparade/instance.xml`
 5. Define and start the instance
 6. Show instance VNC port
-7. Build you seconde instance
+7. Build your second instance
 8. ...
 
 Init scripts:
 
 1. Run the main script: `/etc/virtparade/script.d/${your_image_name}/main.sh ${mountdir}`
-2. Run the network script multiple times(depend on how many addresses you defined in `/etc/virtparade/config.yml` -> instances.network.addresses): `/etc/virtparade/script.d/${your_image_name}/network.sh ${mountdir} ${index} ${ip} ${prefix} ${gateway}`
-3. Run the dns script multiple times(depend on how many dns addresses you defined in `/etc/virtparade/config.yml` -> instances.network.dns): `/etc/virtparade/script.d/${your_image_name}/dns.sh ${mountdir} ${index} ${dns_address}`
+2. Run the network script multiple times(depend on how many addresses you have defined in `/etc/virtparade/config.yml` -> instances.network.addresses): `/etc/virtparade/script.d/${your_image_name}/network.sh ${mountdir} ${index} ${ip} ${prefix} ${gateway}`
+3. Run the dns script multiple times(depend on how many dns addresses you have defined in `/etc/virtparade/config.yml` -> instances.network.dns): `/etc/virtparade/script.d/${your_image_name}/dns.sh ${mountdir} ${index} ${dns_address}`
 
 ## Configuration
 
@@ -93,7 +93,7 @@ instances:                              # required; instance definitions
         - 192.168.102.81
 ```
 
-Write you own image init script in `/etc/virtparade/script.d`
+Write your own image init script in `/etc/virtparade/script.d`
 
 ## Run VirtParade
 
@@ -116,7 +116,7 @@ sudo virtparade run --all                  # build all instances
 sudo virtparade run mycentos7 myubuntu1604 # build specfied instances
 ```
 
-Immediately stop after guestmount the system disk(the first disk), it's useful when you want to write/test you init script or debug the image.
+Immediately stop after `guestmount`ing the system disk(the first disk), it's useful when you want to write/test your init script or debug the image.
 
 ```bash
 sudo virtparade mount mycentos7
@@ -124,7 +124,7 @@ sudo virtparade mount mycentos7
 
 ## Contributing
 
-Just fork the repositry and open a pull request with your changes.
+Just fork the repository and open a pull request with your changes.
 
 ## License
 
