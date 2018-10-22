@@ -23,8 +23,8 @@ def main():
 
     # init logger
     logger.initialize({
-        'stdout': {'enabled': True},
-        'file': {'enabled': False},
+        'stdout': {'enable': True},
+        'file': {'enable': False},
         'project_name': 'virtparade',
     })
 
