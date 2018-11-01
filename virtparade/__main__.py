@@ -32,7 +32,7 @@ def main():
         logger.error('no config loaded, quit')
         sys.exit(1)
 
-    ArgumentParser.parse('virtparade', 'virtparade, a host virt manager', '0.1.0')
+    ArgumentParser.parse('virtparade', 'virtparade, a host virt manager', '0.1.1')
     args = ArgumentParser.args
 
     try:
