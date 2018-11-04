@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='virtparade',
-    version='0.1.1',
+    version='0.1.2',
     python_requires='>=3.4',
     url='https://github.com/major1201/virtparade',
     author='major1201',

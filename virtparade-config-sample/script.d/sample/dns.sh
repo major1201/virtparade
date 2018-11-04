@@ -8,7 +8,7 @@ index=$2
 dns=$3
 
 if [ "${index}" == "0" ]; then
-    echo "${dns}" > "${mount_dir}/etc/resolv.conf"
+    echo "nameserver ${dns}" > "${mount_dir}/etc/resolv.conf"
 else
-    echo "${dns}" >> "${mount_dir}/etc/resolv.conf"
+    echo "nameserver ${dns}" >> "${mount_dir}/etc/resolv.conf"
 fi

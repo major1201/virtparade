@@ -59,6 +59,11 @@ class VirtParade:
                 raise VirtParadeError('image: image(%s) not exist' % image['path'])
             if not objects.contains(image['format'], *self.supported_formats):
                 raise VirtParadeError('image: unknown image format: %s' % image['format'])
+            mount = image.get('mount')
+            if mount is not None:
+                self._check_iterator(mount, emsg='config: mount should be iterable')
+                for i in mount:
+                    self._check_string(i, emsg='config: mount should not be blank')
         self.images = setting_images
 
         # instances
@@ -167,8 +172,14 @@ class VirtParade:
         if rc != 0:
             raise VirtParadeError('create image error, rc: %i' % rc)
 
-    def guestmount(self, image, image_format, mountpoint):
-        cmd = 'guestmount --format=%s -a %s --rw -i %s' % (image_format, image, mountpoint)
+    def guestmount(self, image, image_format, mountpoint, mount=None):
+        how_mount = '-i'
+        if mount is not None:
+            mount_list = []
+            for m in mount:
+                mount_list.append('-m %s' % m)
+            how_mount = ' '.join(mount_list)
+        cmd = 'guestmount --format=%s -a %s --rw %s %s' % (image_format, image, how_mount, mountpoint)
         logger.info('+ %s' % cmd)
         _, _, rc = system.exec_command_std(cmd) if self.debug else system.exec_command(cmd)
         if rc != 0:
@@ -279,7 +290,7 @@ class VirtParade:
                     # guestmount
                     mountdir = tempfile.mkdtemp(prefix='virtparade-')
                     logger.info('mounting sys disk to %s' % mountdir)
-                    self.guestmount(disk['path'], disk['format'], mountdir)
+                    self.guestmount(disk['path'], disk['format'], mountdir, image.get('mount'))
                     if step_to == 'mount':
                         logger.info('sys disk mounted to %s' % mountdir)
                         return
@@ -292,7 +303,7 @@ class VirtParade:
 
                         if os.path.isfile(main_script):
                             logger.info('running main script:')
-                            cmd = '%s %s' % (os.path.join(init_script_dir, 'main.sh'), mountdir)
+                            cmd = '%s %s' % (main_script, mountdir)
                             logger.info('+ %s' % cmd)
                             if self.debug:
                                 system.exec_command_std(cmd)
@@ -304,7 +315,7 @@ class VirtParade:
                         if os.path.isfile(network_script):
                             logger.info('running network script:')
                             for j, address in enumerate(inst['network']['addresses']):
-                                cmd = '%s %s %s %s %s %s' % (os.path.join(init_script_dir, 'network.sh'), mountdir, j, address['ip'],
+                                cmd = '%s %s %s %s %s %s' % (network_script, mountdir, j, address['ip'],
                                                              address['prefix'], strings.strip_to_empty(address.get('gateway')))
                                 logger.info('+ %s' % cmd)
                                 if self.debug:
@@ -318,7 +329,7 @@ class VirtParade:
                             if inst['network'].get('dns') is not None:
                                 logger.info('running dns script:')
                                 for j, dns in enumerate(inst['network'].get('dns')):
-                                    cmd = '%s %s %s %s' % (os.path.join(init_script_dir, 'dns.sh'), mountdir, j, dns)
+                                    cmd = '%s %s %s %s' % (dns_script, mountdir, j, dns)
                                     logger.info('+ %s' % cmd)
                                     if self.debug:
                                         system.exec_command_std(cmd)
