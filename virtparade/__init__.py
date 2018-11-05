@@ -59,6 +59,11 @@ class VirtParade:
                 raise VirtParadeError('image: image(%s) not exist' % image['path'])
             if not objects.contains(image['format'], *self.supported_formats):
                 raise VirtParadeError('image: unknown image format: %s' % image['format'])
+            if image.get('need_expand_filesystem')  is None:
+                image['need_expand_filesystem'] = False
+            else:
+                if not isinstance(image['need_expand_filesystem'], bool):
+                    raise VirtParadeError('config: image need_expand_filesystem should be one of true, false, yes, no')
             mount = image.get('mount')
             if mount is not None:
                 self._check_iterator(mount, emsg='config: mount should be iterable')
@@ -260,7 +265,7 @@ class VirtParade:
 
                 if disk.get('size') is None:
                     shutil.copy(image['path'], disk['path'])
-                else:
+                elif image['need_expand_filesystem']:
                     tempdir = tempfile.mkdtemp(prefix='virtparade-')
                     try:
                         logger.debug('disk exchange temp directory: %s' % tempdir)
@@ -276,6 +281,10 @@ class VirtParade:
                         self.expand_filesystem(disk_sys_orig, image['root_dev'], disk['path'])
                     finally:
                         shutil.rmtree(tempdir, True)
+                else:
+                    shutil.copy(image['path'], disk['path'])
+                    # resize the image
+                    self.resize_image(disk['path'], disk['size'])
 
                 # convert image format if necessary
                 if image['format'] != disk['format']:

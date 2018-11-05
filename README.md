@@ -56,15 +56,21 @@ See config sample in `virtparade-config-sample`.
 /etc/virtparade/config.yml
 
 ```yaml
+debug: true
+
 images:                                 # required; image definitions
   centos7:                              # required; image name
     path: /opt/images/centos7.qcow2     # required; image path
-    format: qcow2                       # required; image format, supported formats: raw, qcow, qcow2, vhdx, vmdk, you can check your image format via `qemu-img info centos7.qcow2`
+    format: qcow2                       # required; image format, supported formats: raw, qcow, qcow2, vhdx, vmdk
     root_dev: /dev/sda1                 # required; image expand partition, you can use `virt-filesystems -a image_path --filesystems -l` to select a device
-  ubuntu1604:
-    path: /opt/images/ubuntu1604.qcow2
+    need_expand_filesystem: true        # optional; default: false; whether to `virt-resize` a image or not, depending you image file
+  coreos:
+    path: /opt/games/images/coreos_production_qemu_image.img
     format: qcow2
-    root_dev: /dev/sda1
+    root_dev: /dev/sda9
+    mount:                              # optional; specify guestmount --mount argument
+      - /dev/sda9                       #   according to guestmount man page, format should be:
+      - /dev/sda3:/usr:ro               #     dev[:mnt[:opts[:fstype]] Mount dev on mnt (if omitted, /)
   freebsd_iso:
     path: /opt/images/freebsd.iso
     format: raw
