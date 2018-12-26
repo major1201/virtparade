@@ -91,8 +91,8 @@ instances:                              # required; instance definitions
     cdrom_image: freebsd_iso            # optional; insert a cdrom to the virtual machine with iso file defined in images
     network:                            # required; network definitions
       addresses:                        # required; network address definitions
-        - ip: 10.246.214.218            # required; ip address
-          prefix: 24                    # required; cidr
+        - ip: 10.246.214.218            # optional; ip address
+          prefix: 24                    # optional; cidr
           gateway: 10.246.214.1         # optional; network gateway, only on could be specified through all addresses
           network_bridge: br-mgmt       # required; network bridge on host
       dns:                              # optional; network dns addresses
