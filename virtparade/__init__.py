@@ -114,9 +114,10 @@ class VirtParade:
             addresses = network.get('addresses')
             self._check_iterator(addresses, 'config: addresses should be iterable')
             for address in addresses:
-                for key in ('ip', 'network_bridge'):
-                    self._check_string(address.get(key), emsg='config: please specify %s' % key)
-                self._check_int(address.get('prefix'), 1, 32, emsg='config: prefix should be in (1, 32)')
+                self._check_string(address.get('network_bridge'), emsg='config: please specify %s' % 'network_bridge')
+                if address.get('ip') is not None:
+                    self._check_string(address.get('ip'), emsg='config: please specify %s' % 'ip')
+                    self._check_int(address.get('prefix'), 1, 32, emsg='config: prefix should be in (1, 32)')
                 # gateway is optional
                 if address.get('gateway') is not None:
                     self._check_string(address.get('gateway'), emsg='config: gateway format error')
@@ -324,6 +325,8 @@ class VirtParade:
                         if os.path.isfile(network_script):
                             logger.info('running network script:')
                             for j, address in enumerate(inst['network']['addresses']):
+                                if address.get('ip') is None:
+                                    continue
                                 cmd = '%s %s %s %s %s %s' % (network_script, mountdir, j, address['ip'],
                                                              address['prefix'], strings.strip_to_empty(address.get('gateway')))
                                 logger.info('+ %s' % cmd)
