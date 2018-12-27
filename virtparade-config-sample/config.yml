@@ -8,7 +8,7 @@ images:                                 # required; image definitions
     root_dev: /dev/sda1                 # required; image expand partition, you can use `virt-filesystems -a image_path --filesystems -l` to select a device
     need_expand_filesystem: true        # optional; default: false; whether to `virt-resize` a image or not, depending you image file
   coreos:
-    path: /opt/games/images/coreos_production_qemu_image.img
+    path: /opt/images/coreos_production_qemu_image.img
     format: qcow2
     root_dev: /dev/sda9
     mount:                              # optional; specify guestmount --mount argument
@@ -39,5 +39,5 @@ instances:                              # required; instance definitions
           gateway: 10.246.214.1         # optional; network gateway, only on could be specified through all addresses
           network_bridge: br-mgmt       # required; network bridge on host
       dns:                              # optional; network dns addresses
-        - 192.168.102.81
+        - 8.8.8.8
 ...

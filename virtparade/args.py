@@ -24,6 +24,11 @@ class ArgumentParser(Singleton):
         parser_mount = subparsers.add_parser('mount', help='mount sepecified instance')
         parser_mount.add_argument('name', nargs=1, help='instance name')
 
+        # subcommand: rm
+        parser_rm = subparsers.add_parser('rm', help='destroy and remove all assets of instances')
+        parser_rm.add_argument('--yes-i-really-really-mean-it', dest='sure', action='count', help=argparse.SUPPRESS)  # hidden in help
+        parser_rm.add_argument('name', nargs='*', help='instance name(s)')
+
         # subcommand: test
         subparsers.add_parser('test', help='test config file')
 

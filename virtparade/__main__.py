@@ -7,7 +7,7 @@ import sys
 
 from virtparade import VirtParade, VirtParadeError
 from virtparade.args import ArgumentParser
-from virtparade.utils import setting, logger
+from virtparade.utils import setting, logger, num
 
 
 def main():
@@ -44,6 +44,13 @@ def main():
                 virt_parade.mkinstances(*args['name'])
         elif args['subcommand'] == 'mount':
             virt_parade.mkinstances(*args['name'], step_to='mount')
+        elif args['subcommand'] == 'rm':
+            if len(args['name']) == 0:
+                pass
+            elif num.safe_int(args['sure']) < 2:
+                logger.warning('type "--yes-i-really-really-mean-it" twice to confirm shutdown, undefine the instance and delete all the disks belong to the instances')
+            else:
+                virt_parade.rm(*args['name'])
         elif args['subcommand'] == 'test':
             logger.info('Config dir(%s) test successfully.' % the_conf_dir)
     except VirtParadeError as e:

@@ -8,11 +8,20 @@ from collections import Iterable
 from .utils import strings, num, setting, logger, objects, system, jinja2
 
 
+LIST_ALL = '--all'
+LIST_INACTIVE = '--inactive'
+LIST_RUNNING = '--state-running'
+LIST_PAUSED = '--state-paused'
+LIST_SHUTOFF = '--state-shutoff'
+LIST_OTHER = '--state-other'
+
 class VirtParadeError(RuntimeError):
     pass
 
 
 class VirtParade:
+    __slots__ = ['conf_dir', 'images', 'instances', 'debug']
+
     supported_formats = ['raw', 'qcow', 'qcow2', 'vhdx', 'vmdk']
 
     def __init__(self, conf_dir='/etc/virtparade'):
@@ -131,8 +140,10 @@ class VirtParade:
         self.instances = setting_instances
 
     @staticmethod
-    def get_instances():
-        stdout, stderr, rc = system.exec_command('virsh list --all --name')
+    def get_instances(state=LIST_ALL):
+        if not objects.contains(state, '', LIST_ALL, LIST_INACTIVE, LIST_RUNNING, LIST_PAUSED, LIST_SHUTOFF, LIST_OTHER):
+            raise VirtParadeError('invalid get_instance state: %s' % state)
+        stdout, stderr, rc = system.exec_command('virsh list %s --name' % state)
         if rc != 0:
             raise VirtParadeError('get_instances error: %s' % stderr)
         return list(filter(strings.is_not_blank, stdout.split('\n')))
@@ -206,12 +217,26 @@ class VirtParade:
         if rc != 0:
             raise VirtParadeError('virsh define error, rc: %i' % rc)
 
+    def virsh_undefine(self, name):
+        cmd = 'virsh undefine %s' % name
+        logger.info('+ %s' % cmd)
+        _, _, rc = system.exec_command_std(cmd) if self.debug else system.exec_command(cmd)
+        if rc != 0:
+            raise VirtParadeError('virsh undefine error, rc: %i' % rc)
+
     def virsh_start(self, name):
         cmd = 'virsh start %s' % name
         logger.info('+ %s' % cmd)
         _, _, rc = system.exec_command_std(cmd) if self.debug else system.exec_command(cmd)
         if rc != 0:
             raise VirtParadeError('virsh start error, rc: %i' % rc)
+
+    def virsh_destroy(self, name):
+        cmd = 'virsh destroy %s' % name
+        logger.info('+ %s' % cmd)
+        _, _, rc = system.exec_command_std(cmd) if self.debug else system.exec_command(cmd)
+        if rc != 0:
+            raise VirtParadeError('virsh destroy error, rc: %i' % rc)
 
     @staticmethod
     def virsh_getvncport(name):
@@ -376,3 +401,37 @@ class VirtParade:
                 os.remove(tempxml)
 
             logger.info('done creating host: %s' % inst['name'])
+
+    def rm(self, *names):
+        """
+        shutdown, undefine the instance and delete all the disks belong to the instances
+        :param names: instances to remove
+        :return:
+        """
+
+        all_instances = self.get_instances()
+        not_shutoff_instances = list(set(all_instances).difference(set(self.get_instances(LIST_SHUTOFF))))
+        for inst in self.instances:
+            name = inst['name']
+            if not objects.contains(name, *names):
+                continue
+
+            logger.info('removing instance: %s' % name)
+
+            # destroy instance
+            if objects.contains(name, *not_shutoff_instances):
+                logger.info('destroying instance: %s' % name)
+                self.virsh_destroy(name)
+
+            # undefine instance
+            if objects.contains(name, *all_instances):
+                logger.info('undefining instance: %s' % name)
+                self.virsh_undefine(name)
+
+            # remove all disks
+            for disk in inst['disks']:
+                logger.info('removing disk: %s' % disk['path'])
+                try:
+                    os.remove(disk['path'])
+                except:
+                    logger.warning('remove disk file failed: %s' % disk['path'])
