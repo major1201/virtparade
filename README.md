@@ -97,6 +97,7 @@ instances:                              # required; instance definitions
           network_bridge: br-mgmt       # required; network bridge on host
       dns:                              # optional; network dns addresses
         - 192.168.102.81
+    autostart: true                     # optional; default: false; auto start on host boot
 ```
 
 Write your own image init script in `/etc/virtparade/script.d`
