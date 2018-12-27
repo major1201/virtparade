@@ -40,4 +40,5 @@ instances:                              # required; instance definitions
           network_bridge: br-mgmt       # required; network bridge on host
       dns:                              # optional; network dns addresses
         - 8.8.8.8
+    autostart: true                     # optional; default: false; auto start on host boot
 ...

@@ -56,6 +56,14 @@ class VirtParade:
         if not isinstance(val, dict):
             raise VirtParadeError(emsg)
 
+    @staticmethod
+    def _check_bool(val, dv=False, emsg='error: bool'):
+        if val is None:
+            return dv
+        if not isinstance(val, bool):
+            raise VirtParadeError(emsg)
+        return val
+
     def parse_config(self):
         # images
         setting_images = setting.conf.get('images')
@@ -68,11 +76,7 @@ class VirtParade:
                 raise VirtParadeError('image: image(%s) not exist' % image['path'])
             if not objects.contains(image['format'], *self.supported_formats):
                 raise VirtParadeError('image: unknown image format: %s' % image['format'])
-            if image.get('need_expand_filesystem')  is None:
-                image['need_expand_filesystem'] = False
-            else:
-                if not isinstance(image['need_expand_filesystem'], bool):
-                    raise VirtParadeError('config: image need_expand_filesystem should be one of true, false, yes, no')
+            image['need_expand_filesystem'] = self._check_bool(image.get('need_expand_filesystem'), False, 'config: image need_expand_filesystem should be one of true, false, yes, no')
             mount = image.get('mount')
             if mount is not None:
                 self._check_iterator(mount, emsg='config: mount should be iterable')
@@ -136,6 +140,8 @@ class VirtParade:
                 self._check_iterator(dns, emsg='config: dns should be iterable')
                 for i in dns:
                     self._check_string(i, emsg='config: dns should not be blank')
+            # autostart is optional
+            instance['autostart'] = self._check_bool(instance.get('autostart'), False, 'config: instance.autostart should be one of true, false, yes, no')
 
         self.instances = setting_instances
 
@@ -245,6 +251,15 @@ class VirtParade:
         stdout, _, rc = system.exec_command(cmd)
         if rc != 0:
             raise VirtParadeError('virsh vncdisplay error!')
+        return stdout
+
+    @staticmethod
+    def virsh_autostart(name, enabled=True):
+        cmd = 'virsh autostart --domain %s %s' % (name, '' if enabled else '--disable')
+        logger.info('+ %s' % cmd)
+        stdout, _, rc = system.exec_command(cmd)
+        if rc != 0:
+            raise VirtParadeError('virsh autostart error!')
         return stdout
 
     def mkinstances(self, *names, step_to=None):
@@ -389,10 +404,11 @@ class VirtParade:
                     **inst
                 )
 
-                # define and start instance
+                # define, start and enable instance
                 logger.info('staring host %s...' % inst['name'])
                 self.virsh_define(tempxml)
                 self.virsh_start(inst['name'])
+                self.virsh_autostart(inst['name'], inst['autostart'])
 
                 # virsh vncdisplay
                 vnc_port = self.virsh_getvncport(inst['name'])
