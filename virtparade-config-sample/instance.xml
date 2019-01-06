@@ -23,11 +23,19 @@
     <devices>
         <emulator>/usr/bin/kvm-spice</emulator>
         {% for disk in disks -%}
+        {% if disk.type == 'file' -%}
         <disk type='file' device='disk'>
             <driver name='qemu' type='{{ disk.format }}' cache='none'/>
             <source file='{{ disk.path }}'/>
             <target dev='{{ disk.dev }}' bus='virtio'/>
         </disk>
+        {% elif disk.type == 'block' %}
+        <disk type='block' device='disk'>
+            <driver name='qemu' type='raw'/>
+            <source dev='{{ disk.block }}'/>
+            <target dev='{{ disk.dev }}' bus='ide'/>
+        </disk>
+        {%- endif %}
         {%- endfor %}
         {% if cdrom_image is defined -%}
         <disk type='file' device='cdrom'>

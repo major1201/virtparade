@@ -101,17 +101,26 @@ class VirtParade:
             if len(disks) == 0:
                 raise VirtParadeError('config: please specify at least one disk')
             for i, disk in enumerate(disks):
-                for key in ['path', 'format']:
-                    self._check_string(disk.get(key), emsg='config: please specify disk %s' % key)
-                if not objects.contains(disk['format'], *self.supported_formats):
-                    raise VirtParadeError('disk: unknown disk format: %s' % disk['format'])
-                if disk.get('image') is not None:
-                    image = self.images.get(disk.get('image'))
-                    if image is None:
-                        raise VirtParadeError('config: undefined image: %s' % disk.get('image'))
-                    disk['image'] = image
-                if disk.get('size') is not None or disk.get('image') is None:  # sys disk size is optional, if disk image is defined
-                    self._check_int(disk.get('size'), 1, emsg='config: disk size (int) should > 0')
+                if disk.get('type') is None:
+                    disk['type'] = 'file'  # default disk type
+
+                if disk['type'] == 'file':
+                    for key in ['path', 'format']:
+                        self._check_string(disk.get(key), emsg='config: please specify disk %s' % key)
+                    if not objects.contains(disk['format'], *self.supported_formats):
+                        raise VirtParadeError('disk: unknown disk format: %s' % disk['format'])
+                    if disk.get('image') is not None:
+                        image = self.images.get(disk.get('image'))
+                        if image is None:
+                            raise VirtParadeError('config: undefined image: %s' % disk.get('image'))
+                        disk['image'] = image
+                    if disk.get('size') is not None or disk.get('image') is None:  # sys disk size is optional, if disk image is defined
+                        self._check_int(disk.get('size'), 1, emsg='config: disk size (int) should > 0')
+                elif disk['type'] == 'block':
+                    self._check_string(disk.get('block'), emsg='config: please specify disk block')
+                else:
+                    raise VirtParadeError('config: invalid disk type: %s' % disk['type'])
+
                 disk['dev'] = "vd%c" % chr(97 + i)
             # check: cdrom image
             cdrom_image = instance.get('cdrom_image')
@@ -283,6 +292,8 @@ class VirtParade:
 
             continue_flag = False
             for disk in inst['disks']:
+                if disk['type'] != 'file':
+                    continue
                 if os.path.exists(disk['path']):
                     logger.warning('disk file already exists: %s, skipping.' % disk['path'])
                     continue_flag = True
@@ -292,6 +303,8 @@ class VirtParade:
 
             # create disks
             for i, disk in enumerate(inst['disks']):
+                if disk['type'] != 'file':
+                    continue
                 image = disk.get('image')
                 if image is None:
                     if step_to == 'mount':
@@ -446,6 +459,8 @@ class VirtParade:
 
             # remove all disks
             for disk in inst['disks']:
+                if disk['type'] != 'file':
+                    continue
                 logger.info('removing disk: %s' % disk['path'])
                 try:
                     os.remove(disk['path'])

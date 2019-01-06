@@ -88,6 +88,8 @@ instances:                              # required; instance definitions
       - path: /data/test1-disk.qcow2    # optional; disk2
         format: qcow2
         size: 40
+      - type: block                     # optional; default: file; current support type: file, block
+        block: /dev/sda2                # required; block devide path
     cdrom_image: freebsd_iso            # optional; insert a cdrom to the virtual machine with iso file defined in images
     network:                            # required; network definitions
       addresses:                        # required; network address definitions
