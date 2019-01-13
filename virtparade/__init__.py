@@ -82,6 +82,7 @@ class VirtParade:
                 self._check_iterator(mount, emsg='config: mount should be iterable')
                 for i in mount:
                     self._check_string(i, emsg='config: mount should not be blank')
+            image['run_script'] = self._check_bool(image.get('run_script'), True, 'config: image run_script should be one of true, false, yes, no')
         self.images = setting_images
 
         # instances
@@ -348,7 +349,7 @@ class VirtParade:
                     os.remove(disk['path'])
                     shutil.move(temp, disk['path'])
 
-                if i == 0:  # mount first disk only
+                if i == 0 and image['run_script']:  # mount first disk only
 
                     # guestmount
                     mountdir = tempfile.mkdtemp(prefix='virtparade-')

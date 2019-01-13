@@ -7,6 +7,7 @@ images:                                 # required; image definitions
     format: qcow2                       # required; image format, supported formats: raw, qcow, qcow2, vhdx, vmdk
     root_dev: /dev/sda1                 # required; image expand partition, you can use `virt-filesystems -a image_path --filesystems -l` to select a device
     need_expand_filesystem: true        # optional; default: false; whether to `virt-resize` a image or not, depending you image file
+    run_script: true                    # optional; default: true; whether to image profile scripts in ./script.d/${image_name} or not
   coreos:
     path: /opt/images/coreos_production_qemu_image.img
     format: qcow2
