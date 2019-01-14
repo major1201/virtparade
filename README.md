@@ -72,10 +72,6 @@ images:                                 # required; image definitions
     mount:                              # optional; specify guestmount --mount argument
       - /dev/sda9                       #   according to guestmount man page, format should be:
       - /dev/sda3:/usr:ro               #     dev[:mnt[:opts[:fstype]] Mount dev on mnt (if omitted, /)
-  freebsd_iso:
-    path: /opt/images/freebsd.iso
-    format: raw
-    root_dev: /dev/sda
 
 instances:                              # required; instance definitions
   - name: mycentos7                     # required; instance name
@@ -91,7 +87,9 @@ instances:                              # required; instance definitions
         size: 40
       - type: block                     # optional; default: file; current support type: file, block
         block: /dev/sda2                # required; block devide path
-    cdrom_image: freebsd_iso            # optional; insert a cdrom to the virtual machine with iso file defined in images
+    cdroms:                             # optional; insert cdroms to the virtual machine with iso file
+      - type: file                      # optional; default: file; file or block
+        path: /opt/images/centos7.iso   # required; file or block path
     network:                            # required; network definitions
       addresses:                        # required; network address definitions
         - ip: 10.246.214.218            # optional; ip address

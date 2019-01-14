@@ -124,13 +124,17 @@ class VirtParade:
 
                 disk['dev'] = "vd%c" % chr(97 + i)
             # check: cdrom image
-            cdrom_image = instance.get('cdrom_image')
-            if cdrom_image is not None:
-                self._check_string(cdrom_image, 'config: cdrom_image should not be blank')
-                image = self.images.get(cdrom_image)
-                if image is None:
-                    raise VirtParadeError('config: undefined image: %s' % cdrom_image)
-                instance['cdrom_image'] = image
+            cdroms = instance.get('cdroms')
+            if cdroms is None:
+                cdroms = instance['cdroms'] = []
+            self._check_iterator(cdroms, 'config: cdroms should be a list')
+            for i, o in enumerate(cdroms):
+                if o.get('type') is None:
+                    o['type'] = 'file'
+                if not objects.contains(o['type'], 'file', 'block'):
+                    raise VirtParadeError('config: unknown cdrom type %s' % o['type'])
+                self._check_string(o.get('path'), 'config: cdrom.path is required')
+                o['dev'] = "hd%c" % chr(97 + i)
             # check: network
             network = instance.get('network')
             self._check_dict(network, 'config: network should be a dict')
