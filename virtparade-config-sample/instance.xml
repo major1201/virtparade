@@ -53,6 +53,10 @@
             <driver name='vhost'/>
         </interface>
         {%- endfor %}
+        <channel type='unix'>
+            <source mode='bind'/>
+            <target type='virtio' name='org.qemu.guest_agent.0'/>
+        </channel>
         <input type='mouse' bus='ps2'/>
         <input type='keyboard' bus='ps2'/>
         <input type='tablet' bus='usb'>
