@@ -7,4 +7,4 @@ conf = None
 
 def load(stream):
     global conf
-    conf = yaml.load(stream)
+    conf = yaml.load(stream, Loader=yaml.FullLoader)

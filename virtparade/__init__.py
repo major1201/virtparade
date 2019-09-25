@@ -15,6 +15,7 @@ LIST_PAUSED = '--state-paused'
 LIST_SHUTOFF = '--state-shutoff'
 LIST_OTHER = '--state-other'
 
+
 class VirtParadeError(RuntimeError):
     pass
 
